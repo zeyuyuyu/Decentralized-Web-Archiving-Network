@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwarmVerse - Train Your AI Swarm!</title>
+    <style>
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #0a0a2a; color: white; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .swarm-arena { 
+            background: rgba(0,0,0,0.5);
+            border-radius: 15px;
+            height: 70vh;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0,255,255,0.2);
+        }
+        .bot { 
+            width: 20px;
+            height: 20px;
+            background: cyan;
+            border-radius: 50%;
+            position: absolute;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .bot:hover { transform: scale(1.2); box-shadow: 0 0 20px cyan; }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+        .achievement {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,255,0,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        .share-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #00ff00;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .share-btn:hover { transform: scale(1.1); }
+        .level-progress {
+            width: 100%;
+            height: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff00, #00ffff);
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 SwarmVerse: Evolution Arena</h1>
+        <div class="level-progress">
+            <div class="progress-bar" style="width: 0%"></div>
+        </div>
+        <div class="swarm-arena" id="arena"></div>
+        <div class="stats">
+            <div>Swarm Size: <span id="size">0</span></div>
+            <div>Evolution Level: <span id="level">1</span></div>
+            <div>Total Score: <span id="score">0</span></div>
+        </div>
+    </div>
+    <button class="share-btn" onclick="shareProgress()">🚀 Share My Swarm!</button>
+    <script>
+        let swarmSize = 0;
+        let level = 1;
+        let score = 0;
+        let bots = [];
+
+        function addBot(x, y) {
+            const bot = document.createElement('div');
+            bot.className = 'bot';
+            bot.style.left = x + 'px';
+            bot.style.top = y + 'px';
+            bot.onclick = () => evolveBot(bot);
+            document.getElementById('arena').appendChild(bot);
+            bots.push(bot);
+            swarmSize++;
+            updateStats();
+        }
+
+        function evolveBot(bot) {
+            score += 10;
+            const colors = ['#00ff00', '#00ffff', '#ff00ff', '#ffff00'];
+            bot.style.background = colors[Math.floor(Math.random() * colors.length)];
+            bot.style.transform = 'scale(1.5)';
+            setTimeout(() => bot.style.transform = 'scale(1)', 300);
+            checkProgress();
+            showAchievement('Bot Evolved! +10 points');
+        }
+
+        function updateStats() {
+            document.getElementById('size').textContent = swarmSize;
+            document.getElementById('level').textContent = level;
+            document.getElementById('score').textContent = score;
+            document.querySelector('.progress-bar').style.width = (score % 100) + '%';
+        }
+
+        function checkProgress() {
+            if (score >= level * 100) {
+                level++;
+                showAchievement('🎉 Level Up! New abilities unlocked!');
+                updateStats();
+            }
+        }
+
+        function showAchievement(text) {
+            const achievement = document.createElement('div');
+            achievement.className = 'achievement';
+            achievement.textContent = text;
+            document.body.appendChild(achievement);
+            setTimeout(() => achievement.remove(), 3000);
+        }
+
+        function shareProgress() {
+            const text = `🤖 I've evolved my SwarmVerse to Level ${level} with ${score} points! Can you beat me? #SwarmVerse`;
+            if (navigator.share) {
+                navigator.share({
+                    title: 'SwarmVerse Progress',
+                    text: text,
+                    url: window.location.href
+                });
+            } else {
+                alert('Copy this to share: ' + text);
+            }
+        }
+
+        document.getElementById('arena').onclick = (e) => {
+            if (e.target.className === 'swarm-arena') {
+                addBot(e.offsetX - 10, e.offsetY - 10);
+            }
+        };
+
+        setInterval(() => {
+            bots.forEach(bot => {
+                const x = parseFloat(bot.style.left) + (Math.random() - 0.5) * 5;
+                const y = parseFloat(bot.style.top) + (Math.random() - 0.5) * 5;
+                bot.style.left = Math.min(Math.max(0, x), arena.clientWidth - 20) + 'px';
+                bot.style.top = Math.min(Math.max(0, y), arena.clientHeight - 20) + 'px';
+            });
+        }, 50);
+    </script>
+</body>
+</html>
